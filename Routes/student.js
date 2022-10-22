@@ -4,16 +4,21 @@ const { verifyToken } = require("./verifyToken");
 
 //Add Student and Mark
 
-router.post("/add-student", verifyToken, async (request, response) => {
+router.post("/add-student/:userid", verifyToken, async (request, response) => {
   const newStudent = new Student({
     name: request.body.name,
     mark: request.body.mark,
     subject: request.body.subject,
+    userid: request.params.userid,
   });
 
   try {
     let findStudent = await Student.findOneAndUpdate(
-      { name: request.body.name, subject: request.body.subject },
+      {
+        name: request.body.name,
+        subject: request.body.subject,
+        userid: request.params.userid,
+      },
       {
         $inc: { mark: request.body.mark },
       }
@@ -35,9 +40,9 @@ router.post("/add-student", verifyToken, async (request, response) => {
   }
 });
 
-router.get("/dashboard", verifyToken, async (request, response) => {
+router.get("/dashboard/:userid", verifyToken, async (request, response) => {
   try {
-    const students = await Student.find();
+    const students = await Student.find({ userid: request.params.userid });
     if (students) {
       response.status(200).json(students);
     } else {
@@ -48,7 +53,7 @@ router.get("/dashboard", verifyToken, async (request, response) => {
   }
 });
 
-router.get("/:id", verifyToken, async (request, response) => {
+router.get("/:userid/:id", verifyToken, async (request, response) => {
   try {
     const student = await Student.findById(request.params.id);
     if (student) {
@@ -62,7 +67,7 @@ router.get("/:id", verifyToken, async (request, response) => {
   }
 });
 
-router.put("/:id", verifyToken, async (request, response) => {
+router.put("/:userid/:id", verifyToken, async (request, response) => {
   try {
     const student = await Student.findByIdAndUpdate(request.params.id, {
       $set: {
@@ -71,7 +76,7 @@ router.put("/:id", verifyToken, async (request, response) => {
         mark: request.body.mark,
       },
     });
-    const students = await Student.find();
+    // const students = await Student.find();
 
     if (student) {
       response.status(200).json({ student, message: "Successfully Updated" });
@@ -82,10 +87,10 @@ router.put("/:id", verifyToken, async (request, response) => {
   }
 });
 
-router.delete("/:id", verifyToken, async (request, response) => {
+router.delete("/:userid/:id", verifyToken, async (request, response) => {
   try {
     const student = await Student.findByIdAndDelete(request.params.id);
-    const students = await Student.find();
+    const students = await Student.find({ userid: request.params.userid });
     if (student) {
       response.status(200).json({ students, message: "Successfully Deleted" });
     }
