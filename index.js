@@ -20,7 +20,9 @@ app.use(
     origin: "*",
   })
 );
-
+app.get("/", (request, response) => {
+  response.send("Server is running");
+});
 //Listen Port
 app.listen(process.env.PORT || 3001, () => {
   console.log("Backend Server is running!!");
